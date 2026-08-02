@@ -1,0 +1,49 @@
+import { z } from "zod/v4";
+import { CATEGORIES } from "../types/models/product.js";
+
+export const mongoDbIdSchema = z
+  .string()
+  .regex(/^[a-f\d]{24}$/i, "Invalid MongoDB ID format");
+
+export const idParamsSchema = z.object({
+  id: mongoDbIdSchema,
+});
+
+export const recipeIdParamsSchema = z.object({
+  recipeId: mongoDbIdSchema,
+});
+
+export const paginationSchema = z.object({
+  page: z
+    .string()
+    .default("1")
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Page must be a positive integer")),
+  limit: z
+    .string()
+    .default("10")
+    .transform(Number)
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1, "Limit must be a positive integer")
+        .max(100, "Limit cannot exceed 100"),
+    ),
+});
+
+export const sortSchema = z.object({
+  sortBy: z.string().optional().default("createdAt"),
+  sortOrder: z
+    .enum(["asc", "desc"])
+    .optional()
+    .default("desc")
+    .transform((val) => (val === "asc" ? 1 : -1) as 1 | -1),
+});
+
+export const searchSchema = z.object({
+  search: z.string().optional(),
+category: z.enum(CATEGORIES).optional(),
+});
+
+export const filterSchema = sortSchema.and(paginationSchema).and(searchSchema);
