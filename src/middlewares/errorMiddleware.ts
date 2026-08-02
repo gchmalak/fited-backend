@@ -18,7 +18,7 @@ export function errorMiddleware (
         return;
     }
 
-    //mongoose duplicate key erro(if email  already exists for ex)
+    //mongoose duplicate key error(if email  already exists for ex)
     if (err && typeof err === "object" && "code" in err && err.code === 11000){
         errorResponse(res, "This value already exists ",StatusCodes.CONFLICT)
         return

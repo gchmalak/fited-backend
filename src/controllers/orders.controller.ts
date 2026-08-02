@@ -174,6 +174,7 @@ export async function updateOrderStatus(
 
     const order = await Order.findByIdAndUpdate(
       id,
+      
       { status },
       { new: true, runValidators: true },
     );

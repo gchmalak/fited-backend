@@ -22,6 +22,7 @@ export const userSchema = loginSchema.extend({
     .max(300,"Bio must be at most 300 characters long")
     .optional()
     .transform((val) =>  val ?? undefined)
+    // i need to add phone number
 })
 
 export const registrationSchema = userSchema.extend({
@@ -31,3 +32,6 @@ export const registrationSchema = userSchema.extend({
 export const updateUserRoleSchema = z.object({
   role: z.enum(["admin", "user"]),
 });
+
+// _____________change password____________________________________________
+// ______________modify password___________________________________________
