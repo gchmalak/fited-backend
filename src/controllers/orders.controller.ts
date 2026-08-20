@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Cart } from "../models/cart.js";
+
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import {
@@ -15,11 +15,10 @@ export async function createOrder(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { address } = req.body;
+    const { address,items } = req.body;
 
-    const cart = await Cart.findOne({ userId: req.user!._id });
 
-    if (!cart || cart.cartItems.length === 0) {
+    if (items.length === 0) {
       errorResponse(res, "Your cart is empty", StatusCodes.BAD_REQUEST);
       return;
     }
@@ -28,8 +27,8 @@ export async function createOrder(
     const orderItems = [];
     let totalPrice = 0;
 
-    for (const item of cart.cartItems) {
-      const product = await Product.findById(item.product);
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
 
       if (!product) {
         errorResponse(
@@ -65,7 +64,7 @@ export async function createOrder(
       const priceAtPurchase = product.price;
 
       orderItems.push({
-        product: item.product,
+        product: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
         priceAtPurchase,
@@ -86,11 +85,7 @@ export async function createOrder(
       address,
     });
 
-    // clear the cart after successful order
-    cart.cartItems = [] as any;
-    cart.totalItems = 0;
-    cart.totalPrice = 0;
-    await cart.save();
+ 
 
     successResponse(res, order, "Order placed successfully!", StatusCodes.CREATED);
   } catch (err) {

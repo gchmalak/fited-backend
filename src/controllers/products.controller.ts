@@ -3,6 +3,8 @@ import { Product } from "../models/product.js";
 import { errorResponse, noContentResponse, paginatedResponse, successResponse } from "../utils/responseFormatter.js";
 import { StatusCodes } from "http-status-codes";
 import { getPaginationSkip, getTotalPages } from "../utils/pagination.js";
+import { DEPARTMENTS } from "../types/models/product.js";
+import { getNextSequence } from "../utils/counter.js";
 // _______________createproduct funtion________________
 export async function createProduct(
     req:Request,
@@ -10,14 +12,19 @@ export async function createProduct(
     next:NextFunction,
 ): Promise<void>{
     try {
+      const seq = await getNextSequence("productId");
+      const productId = `PRD-${String(seq).padStart(5,"0")}`
         const product = await Product.create({
      ...req.body,
      authorId: req.user!._id,
+     productId
         })
         successResponse(res, product,"Product created successfully !", StatusCodes.CREATED,);
+      
     } catch (err) {
         next(err)
     }
+    
 }
 // ____________________getProducts function______________________________________
 const ALLOWED_SORT_FIELDS = ["createdAt", "price", "averageRating"] as const;
@@ -37,7 +44,7 @@ export async function getProducts(
 
     const skip = getPaginationSkip(page, limit);
 
- const { search, department, category } = req.query as Record<string, string | undefined>;
+ const { search, department, categoryId } = req.query as Record<string, string | undefined>;
     const filter: Record<string, unknown> = {};
 
     if (search) {
@@ -46,10 +53,11 @@ export async function getProducts(
         { name: regex },
         { description: regex },
         { brand: regex },
+        {productId:regex}
       ];
     }
     if (department) filter.department = department;
-    if (category) filter.category = category;
+    if (categoryId) filter.categoryId = categoryId;
 
     const sortField = (ALLOWED_SORT_FIELDS as readonly string[]).includes(
       sortBy,
@@ -65,7 +73,8 @@ export async function getProducts(
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate("authorId", "-password");
+      .populate("authorId", "-password")
+      .populate("categoryId");
 
     paginatedResponse(res, products, {
       totalCount,
@@ -88,6 +97,7 @@ export async function getProduct (
         id,
         
     ).populate("authorId", "-password")
+    .populate("categoryId")
     
     if(!product){
         errorResponse(res,"Product not found " , StatusCodes.NOT_FOUND)
@@ -144,5 +154,13 @@ export async function deleteProduct(
     noContentResponse(res);
   } catch (err) {
     next(err);
+  }
+}
+// ______________________________________________get filters_____________________________
+export async function getFilters(req:Request, res:Response, next:NextFunction){
+  try {
+    successResponse(res, {departments:DEPARTMENTS})
+  } catch (err) {
+    next(err)
   }
 }

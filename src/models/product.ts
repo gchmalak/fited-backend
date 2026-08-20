@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
-import { CATEGORIES, DEPARTMENTS, IProduct, IReview, IVariant } from "../types/models/product.js";
+import { DEPARTMENTS, IProduct, IReview, IVariant } from "../types/models/product.js";
+
 
 
 
@@ -21,12 +22,14 @@ createdAt:{type:Date,required:true}
 },{_id:true})
 
 const productSchema = new Schema<IProduct>({
+    productId: { type: String, required: true, unique: true },
     name:{type:String,required:true},
 description:{type:String,required:true},
 images:{type:[String], required:true},
 brand:{type:String,required:true},
 department:{type:String, enum:DEPARTMENTS, required:true},
-category:{type:String,enum:CATEGORIES,required:true},
+categoryId:{type:Schema.Types.ObjectId,ref:"Category",required:true},
+subcategory:{type:String},
 price:{type:Number, required:true},
 variants:[variantSchema],
 reviews:[reviewSchema],

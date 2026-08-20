@@ -1,5 +1,6 @@
 import z from "zod";
-import { CATEGORIES, DEPARTMENTS } from "../types/models/product.js";
+import { DEPARTMENTS } from "../types/models/product.js";
+import { mongoDbIdSchema } from "./utils.js";
 
 export const variantSchema = z.object({
 
@@ -15,7 +16,8 @@ export const    createProductSchema = z.object({
 name:z.string().min(3,"Name should at least be 3 characters long").max(20,"Name should at most be 20 characters long"),
 description:z.string().min(10,"Description should at least be 10 characters long"),
 department:z.enum(DEPARTMENTS),
-category:z.enum(CATEGORIES).optional(), //optional as not  every product has a category
+categoryId:mongoDbIdSchema, 
+subcategory:z.string().optional(),
 price:z.coerce.number().min(1000, "Price should at least be 1000 DA"),
 images:z.array(z.url("Each image must be a valid URL")).min(1,"Product should at least have 1 image"),
 variants:z.array(variantSchema).default([]),

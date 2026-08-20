@@ -22,10 +22,19 @@ export async function getAllUsers(
 
     const skip = getPaginationSkip(page, limit);
 
-    const totalCount = await User.countDocuments();
+const {role, search} =req.query as Record<string , string | undefined>
+const  filter : Record<string , unknown>={}
+if(role === "admin" || role === "user"){
+  filter.role = role
+}
+if(search){
+  const regex = {$regex : search, $options:"i"}
+  filter.$or =[{username: regex},{email:regex}]}
+
+    const totalCount = await User.countDocuments(filter);
     const totalPages = getTotalPages(totalCount, limit);
 
-    const users = await User.find()
+    const users = await User.find(filter)
       .select("-password")
       .sort({ createdAt: -1 })
       .skip(skip)

@@ -3,7 +3,6 @@ import { User } from"../models/user.js"
 import jwt from "jsonwebtoken";
 import { errorResponse, successResponse } from "../utils/responseFormatter.js";
 import { StatusCodes } from "http-status-codes";
-import { registrationSchema } from "../validation/users.js";
 // _______________________LOGIN_________________________________________________________________
 export async function login(req: Request, res: Response, next: NextFunction) {
   const { password, email } = req.body;
@@ -46,11 +45,28 @@ export async function register(
   res: Response,
   next: NextFunction,
 ) {
-    const user = req.body;
-    try {
+  const { username, email, password, avatarUrl, bio, role, adminCode } = req.body;
 
-  const createdUser = new User(user);
-await createdUser.save();
+  try {
+    let finalRole: "admin" | "user" = "user";
+
+    if (role === "admin") {
+      if (adminCode !== process.env.ADMIN_SIGNUP_CODE) {
+        errorResponse(res, "Invalid admin code", StatusCodes.FORBIDDEN);
+        return;
+      }
+      finalRole = "admin";
+    }
+
+    const createdUser = new User({
+      username,
+      email,
+      password,
+      avatarUrl,
+      bio,
+      role: finalRole,
+    });
+    await createdUser.save();
 
     const userInfo = { id: createdUser._id.toString(), role: createdUser.role };
 
@@ -58,10 +74,7 @@ await createdUser.save();
       expiresIn: process.env.TOKEN_EXPIRY || "7d",
     } as jwt.SignOptions);
 
-    const userObj = createdUser.toObject() as unknown as Record<
-      string,
-      unknown
-    >;
+    const userObj = createdUser.toObject() as unknown as Record<string,unknown>;
     delete userObj.password;
 
     successResponse(

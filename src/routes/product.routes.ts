@@ -17,6 +17,7 @@ import {
 import {
   createProduct,
   deleteProduct,
+  getFilters,
   getProduct,
   getProducts,
   updateProduct,
@@ -34,6 +35,7 @@ productRouter
     createProduct,
   );
 
+  productRouter.get("/filters",getFilters)
 productRouter
   .route("/:id")
   .get(validateParamsSchema(idParamsSchema), getProduct)
@@ -50,5 +52,4 @@ productRouter
     validateParamsSchema(idParamsSchema),
     deleteProduct,
   );
-
 export default productRouter;

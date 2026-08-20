@@ -26,7 +26,7 @@ export const userSchema = loginSchema.extend({
 })
 
 export const registrationSchema = userSchema.extend({
-    role: z.enum(["admin","user"]),
+    role: z.enum(["admin","user"]).optional(),
     adminCode:z.string().min(6,"Admin code must at least be 6 characters long").optional()
 })
 export const updateUserRoleSchema = z.object({

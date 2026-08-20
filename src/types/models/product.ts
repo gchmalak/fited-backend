@@ -3,28 +3,15 @@ import { Document, Types } from "mongoose";
 
 export const DEPARTMENTS=[
     "Clothing",
-    "Shoes",
     "Makeup",
     "Skincare",
     "Jewelry",
-    "Perfume"
+    "Perfume",
+    "Shoes"
 ] as const;
-export const CATEGORIES =[
-   "Tops",
-   "Bottoms",
-   "Dresses",
-   "Activewear",
-   "Lipstick",
-   "Blush",
-   "Foundation",
-   "Necklace",
-   "Ring",
-   "Bracelet",
-   "Earring"
-   
-]
+
 export type ProductDepartment = (typeof DEPARTMENTS)[number];
-export type ProductCategory = (typeof CATEGORIES)[number];
+
 export interface IVariant {
     _id: string;
     size?:string;
@@ -43,12 +30,14 @@ export interface IReview{
 
 }
 export interface IProduct{
+    productId: string; // human-readable ID, e.g. "PRD-00001", auto-generated
     name:string;//product name
     description:string;//product description
    images:string[]//array bcs multiple pictures
    brand:string;
    department:ProductDepartment;
-   category:ProductCategory;
+   categoryId:Types.ObjectId;
+   subcategory:string;
    price:number;
    variants:IVariant[];
    reviews:IReview[];

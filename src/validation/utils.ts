@@ -1,5 +1,4 @@
 import { z } from "zod/v4";
-import { CATEGORIES } from "../types/models/product.js";
 
 export const mongoDbIdSchema = z
   .string()
@@ -43,7 +42,7 @@ export const sortSchema = z.object({
 
 export const searchSchema = z.object({
   search: z.string().optional(),
-category: z.enum(CATEGORIES).optional(),
+categoryId: mongoDbIdSchema.optional(),
 });
 
 export const filterSchema = sortSchema.and(paginationSchema).and(searchSchema);
