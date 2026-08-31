@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CheckAuth, isAdmin } from "../middlewares/auth.js";
+import { CheckAuth, isAdmin, isOwner } from "../middlewares/auth.js";
 import {
   getDashboardStats,
   getLowStockProducts,
@@ -8,6 +8,6 @@ import {
 const dashboardRouter = Router();
 
 dashboardRouter.get("/stats", CheckAuth, isAdmin, getDashboardStats);
-dashboardRouter.get("/low-stock", CheckAuth, isAdmin, getLowStockProducts);
+dashboardRouter.get("/low-stock", CheckAuth, isOwner, getLowStockProducts);
 
 export default dashboardRouter;

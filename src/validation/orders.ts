@@ -2,7 +2,13 @@ import { z } from "zod/v4";
 import { mongoDbIdSchema } from "./utils.js";
 
 export const createOrderSchema = z.object({
-  address: z.string().min(5, "Address is required"),
+ fullName: z.string().min(2, "Full name is required"),
+  phone: z.string().min(8, "Valid phone number is required"),
+  street: z.string().min(3, "Street address is required"),
+  city: z.string().min(2, "City is required"),
+  wilaya: z.string().min(2, "Wilaya/state is required"),
+  postalCode: z.string().optional(),
+  deliveryNotes: z.string().optional(),
   items:z.array(
     z.object({
       productId:mongoDbIdSchema,

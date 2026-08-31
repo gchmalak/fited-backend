@@ -5,6 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { getPaginationSkip, getTotalPages } from "../utils/pagination.js";
 import { DEPARTMENTS } from "../types/models/product.js";
 import { getNextSequence } from "../utils/counter.js";
+import { Category } from "../models/category.js";
 // _______________createproduct funtion________________
 export async function createProduct(
     req:Request,
@@ -44,24 +45,35 @@ export async function getProducts(
 
     const skip = getPaginationSkip(page, limit);
 
- const { search, department, categoryId } = req.query as Record<string, string | undefined>;
+    const { search, department, departments, categoryId } = req.query as Record<string, string | undefined>;
     const filter: Record<string, unknown> = {};
 
     if (search) {
       const regex = { $regex: search, $options: "i" };
+
+      // find categories whose name matches the search text too
+      const matchingCategories = await Category.find({ name: regex }).select("_id");
+      const matchingCategoryIds = matchingCategories.map((c) => c._id);
+
       filter.$or = [
         { name: regex },
         { description: regex },
         { brand: regex },
-        {productId:regex}
+        { productId: regex },
+        ...(matchingCategoryIds.length > 0 ? [{ categoryId: { $in: matchingCategoryIds } }] : []),
       ];
     }
-    if (department) filter.department = department;
+
+    if (departments) {
+      const departmentList = departments.split(",");
+      filter.department = { $in: departmentList };
+    } else if (department) {
+      filter.department = department;
+    }
+
     if (categoryId) filter.categoryId = categoryId;
 
-    const sortField = (ALLOWED_SORT_FIELDS as readonly string[]).includes(
-      sortBy,
-    )
+    const sortField = (ALLOWED_SORT_FIELDS as readonly string[]).includes(sortBy)
       ? sortBy
       : "createdAt";
     const sort: Record<string, 1 | -1> = { [sortField]: sortOrder };

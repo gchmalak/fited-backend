@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CheckAuth, isAdmin } from "../middlewares/auth.js";
+import { CheckAuth, isAdmin, isOwner } from "../middlewares/auth.js";
 import { validateBodySchema, validateParamsSchema } from "../middlewares/validation.js";
 import { idParamsSchema } from "../validation/utils.js";
 import { createCategorySchema, updateCategorySchema } from "../validation/categories.js";
@@ -10,7 +10,7 @@ import {
   deleteCategory,
 } from "../controllers/category.controller.js";
 
-const categoryRouter = Router();
+ export const categoryRouter = Router();
 
 categoryRouter
   .route("/")
@@ -20,6 +20,4 @@ categoryRouter
 categoryRouter
   .route("/:id")
   .put(CheckAuth,isAdmin,validateParamsSchema(idParamsSchema),validateBodySchema(updateCategorySchema),updateCategory)     // CheckAuth, isAdmin, validateParamsSchema(idParamsSchema), validateBodySchema(updateCategorySchema)
-  .delete(CheckAuth,isAdmin,validateParamsSchema(idParamsSchema),deleteCategory); // CheckAuth, isAdmin, validateParamsSchema(idParamsSchema)
-
-export default categoryRouter;
+  .delete(CheckAuth, isOwner, validateParamsSchema(idParamsSchema), deleteCategory)

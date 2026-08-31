@@ -14,8 +14,17 @@ export interface IOrderItem{
 
 // ------------IOrder-----------------------------------------------
 export interface IOrder{
+    orderId:string;
     userId:Types.ObjectId; //info of the person who placed the order this gets their info without having to copy all of it ex:name,number.....
     items:IOrderItem[];
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    wilaya: string;
+    postalCode?: string;
+    deliveryNotes?: string;
+
     totalPrice:number;
     status:"pending"|"shipped"|"delivered"|"cancelled";
     address:string; //supposed to be an object of sr=treet ,city,country...

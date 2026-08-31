@@ -1,3 +1,4 @@
+import { v2 as cloudinary } from "cloudinary";
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/user.js";
 import {
@@ -8,6 +9,11 @@ import {
 import { StatusCodes } from "http-status-codes";
 import { getPaginationSkip, getTotalPages } from "../utils/pagination.js";
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 // _____________________getAllUsers______________________
 export async function getAllUsers(
   req: Request,
@@ -128,3 +134,44 @@ export async function reactivateUser(
     next(err);
   }
 }
+
+// _______________________UPDATE PROFILE PICTURE_________________________________
+
+export async function updateProfilePicture(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { avatarUrl } = req.body;
+
+    if (!avatarUrl) {
+      errorResponse(
+        res,
+        "Profile picture URL is required",
+        StatusCodes.BAD_REQUEST,
+      );
+      return;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user!._id,
+      { avatarUrl },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!user) {
+      errorResponse(res, "User not found", StatusCodes.NOT_FOUND);
+      return;
+    }
+
+    successResponse(
+      res,
+      user,
+      "Profile picture updated successfully",
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+

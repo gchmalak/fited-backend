@@ -28,10 +28,19 @@ const userSchema = new Schema<IUser,UserModel,IUserMethods>(
             type:String,
             required:true,
         },
-        role:{type:String,enum:["admin","user"], default:"user"},
-        avatarUrl:{type:String},
+        resetPasswordTokenHash: { type: String },
+        resetPasswordExpires: { type: Date },
+        role: { type: String, enum: ["owner", "admin", "user"], default: "user" },
+        avatarUrl: {type: String,},
+        
         bio:{type:String},
-    isActive: { type: Boolean, default: true },
+        isActive: { type: Boolean, default: true },
+        wishlist: [
+    {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+    },
+],
     },
     {
         timestamps :true,
@@ -41,9 +50,11 @@ const userSchema = new Schema<IUser,UserModel,IUserMethods>(
     },
 
 );
-userSchema.virtual("isAdmin").get(function(){
-    return this.role=== "admin";
-
+userSchema.virtual("isAdmin").get(function (this: IUser) {
+  return this.role === "admin" || this.role === "owner";
+});
+userSchema.virtual("isOwner").get(function (this: IUser) {
+  return this.role === "owner";
 });
 userSchema.pre("save", async function(){
     if(this.isNew || this.isModified("password")){

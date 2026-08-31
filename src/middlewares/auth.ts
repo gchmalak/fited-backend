@@ -53,20 +53,35 @@ export async function CheckAuth(
       return;
     }
 
-    req.user = user.toObject() as Express.Request["user"];
+    req.user = user.toObject() as unknown as Express.Request["user"];
     next();
   } catch (err) {
     next(err);
   }
 }
 
-export function isAdmin(req: Request, res: Response, next: NextFunction): void {
-  if (req.user?.isAdmin) {
+export function isAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  if (req.user?.role === "admin" || req.user?.role === "owner") {
     next();
   } else {
     errorResponse(
       res,
       "You are not an admin, you can't access this route",
+      StatusCodes.FORBIDDEN,
+    );
+  }
+}
+export function isOwner(req: Request, res: Response, next: NextFunction): void {
+  if (req.user?.role === "owner") {
+    next();
+  } else {
+    errorResponse(
+      res,
+      "Only the store owner can perform this action",
       StatusCodes.FORBIDDEN,
     );
   }

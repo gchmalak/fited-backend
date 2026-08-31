@@ -1,9 +1,10 @@
-import { NextFunction, Request, Response } from "express";
 
+import { NextFunction, Request, Response } from "express";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import {
   errorResponse,
+  paginatedResponse,
   successResponse,
 } from "../utils/responseFormatter.js";
 import { StatusCodes } from "http-status-codes";
@@ -15,15 +16,22 @@ export async function createOrder(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { address,items } = req.body;
+    const {
+      fullName,
+      phone,
+      street,
+      city,
+      wilaya,
+      postalCode,
+      deliveryNotes,
+      items,
+    } = req.body;
 
-
-    if (items.length === 0) {
+    if (!items || items.length === 0) {
       errorResponse(res, "Your cart is empty", StatusCodes.BAD_REQUEST);
       return;
     }
 
-    // Build order items with real, server-side prices
     const orderItems = [];
     let totalPrice = 0;
 
@@ -33,7 +41,7 @@ export async function createOrder(
       if (!product) {
         errorResponse(
           res,
-          `Product no longer exists`,
+          "Product no longer exists",
           StatusCodes.BAD_REQUEST,
         );
         return;
@@ -72,22 +80,34 @@ export async function createOrder(
 
       totalPrice += priceAtPurchase * item.quantity;
 
-      // decrement stock for the purchased variant
+      // Decrement stock for purchased variant
       variant.stock -= item.quantity;
       await product.save();
     }
 
+    const orderId = `FITTED-${Date.now()}`;
+
     const order = await Order.create({
       userId: req.user!._id,
+      orderId,
       items: orderItems,
       totalPrice,
       status: "pending",
-      address,
+      fullName,
+      phone,
+      street,
+      city,
+      wilaya,
+      postalCode,
+      deliveryNotes,
     });
 
- 
-
-    successResponse(res, order, "Order placed successfully!", StatusCodes.CREATED);
+    successResponse(
+      res,
+      order,
+      "Order placed successfully!",
+      StatusCodes.CREATED,
+    );
   } catch (err) {
     next(err);
   }
@@ -100,9 +120,12 @@ export async function getMyOrders(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const orders = await Order.find({ userId: req.user!._id }).sort({
-      createdAt: -1,
-    });
+    const orders = await Order.find({ userId: req.user!._id })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "items.product",
+        select: "name images",
+      });
 
     successResponse(res, orders);
   } catch (err) {
@@ -119,17 +142,25 @@ export async function getOrder(
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate({
+      path: "items.product",
+      select: "name images",
+    });
 
     if (!order) {
       errorResponse(res, "Order not found", StatusCodes.NOT_FOUND);
       return;
     }
 
-    // only the order's owner or an admin can view it
-    const isOwner = order.userId.toString() === req.user!._id.toString();
+    const isOwner =
+      order.userId.toString() === req.user!._id.toString();
+
     if (!isOwner && !req.user!.isAdmin) {
-      errorResponse(res, "Not authorized to view this order", StatusCodes.FORBIDDEN);
+      errorResponse(
+        res,
+        "Not authorized to view this order",
+        StatusCodes.FORBIDDEN,
+      );
       return;
     }
 
@@ -146,12 +177,77 @@ export async function getAllOrders(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).populate(
-      "userId",
-      "-password",
-    );
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : undefined;
 
-    successResponse(res, orders);
+    const productName =
+      typeof req.query.productName === "string"
+        ? req.query.productName.trim()
+        : undefined;
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Number(req.query.limit) || 20);
+    const skip = (page - 1) * limit;
+
+    const filter: Record<string, unknown> = {};
+
+    // Search by Order ID
+    if (search) {
+      filter.orderId = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Search orders containing a product with this name
+    if (productName) {
+      const products = await Product.find({
+        name: {
+          $regex: productName,
+          $options: "i",
+        },
+      }).select("_id");
+
+      const productIds = products.map((product) => product._id);
+
+      // No products match the search
+      if (productIds.length === 0) {
+        paginatedResponse(res, [], {
+          totalCount: 0,
+          totalPages: 1,
+          currentPage: page,
+        });
+        return;
+      }
+
+      filter["items.product"] = {
+        $in: productIds,
+      };
+    }
+
+    const [orders, totalCount] = await Promise.all([
+      Order.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("userId", "-password")
+        .populate({
+          path: "items.product",
+          select: "name images",
+        }),
+
+      Order.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+
+    paginatedResponse(res, orders, {
+      totalCount,
+      totalPages,
+      currentPage: page,
+    });
   } catch (err) {
     next(err);
   }
@@ -169,10 +265,15 @@ export async function updateOrderStatus(
 
     const order = await Order.findByIdAndUpdate(
       id,
-      
       { status },
-      { new: true, runValidators: true },
-    );
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).populate({
+      path: "items.product",
+      select: "name images",
+    });
 
     if (!order) {
       errorResponse(res, "Order not found", StatusCodes.NOT_FOUND);
@@ -182,5 +283,4 @@ export async function updateOrderStatus(
     successResponse(res, order, "Order status updated!");
   } catch (err) {
     next(err);
-  }
-}
+  }}

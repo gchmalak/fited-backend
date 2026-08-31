@@ -5,9 +5,9 @@ export const DEPARTMENTS=[
     "Clothing",
     "Makeup",
     "Skincare",
-    "Jewelry",
+    "Accessories",
     "Perfume",
-    "Shoes"
+
 ] as const;
 
 export type ProductDepartment = (typeof DEPARTMENTS)[number];
@@ -44,6 +44,7 @@ export interface IProduct{
    averageRating:number;
    reviewCount:number;
    authorId:Types.ObjectId;
+
    isActive:boolean;//so that admin can hide the product if out of stock without deleting it completely
    createdAt:Date;
    updatedAt:Date;

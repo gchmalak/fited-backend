@@ -9,9 +9,13 @@ import productRouter from "./routes/product.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
 import userRouter from "./routes/user.routes.js";
 import orderRouter from "./routes/order.routes.js";
-import categoryRouter from "./routes/category.routes.js";
 import carouselRouter from "./routes/carousel.routes.js"; // <-- Carousel router
 import uploadRouter from "./routes/upload.routes.js";     // <-- Upload router
+import editorialRouter from "./routes/editorial.routes.js";
+import newsletterRouter from "./routes/newsletter.routes.js";
+import contactRouter from "./routes/contact.routes.js";
+import { categoryRouter } from "./routes/category.routes.js";
+import wishlistRouter from "./routes/wishlist.routes.js";
 
 // server
 const app = express();
@@ -40,7 +44,11 @@ app.use("/api/users", userRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/carousel", carouselRouter); // <-- Registered endpoint
 app.use("/api/upload", uploadRouter);     // <-- Registered endpoint
+app.use("/api/editorial", editorialRouter);
 
+app.use("/api/newsletter", newsletterRouter);
+app.use("/api/contact", contactRouter);
+app.use("/api/wishlist", wishlistRouter);
 // not found routes & error handling
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

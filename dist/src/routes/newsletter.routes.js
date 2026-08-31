@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { CheckAuth, isAdmin } from "../middlewares/auth.js";
+import { validateBodySchema } from "../middlewares/validation.js";
+import { broadcastSchema, subscribeSchema } from "../validation/newsletter.js";
+import { subscribe, getAllSubscribers, sendBroadcast } from "../controllers/newsletter.controller.js";
+const newsletterRouter = Router();
+newsletterRouter.post("/subscribe", validateBodySchema(subscribeSchema), subscribe);
+newsletterRouter.get("/", CheckAuth, isAdmin, getAllSubscribers);
+newsletterRouter.post("/broadcast", CheckAuth, isAdmin, validateBodySchema(broadcastSchema), sendBroadcast);
+export default newsletterRouter;

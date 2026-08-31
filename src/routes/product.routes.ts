@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CheckAuth, isAdmin } from "../middlewares/auth.js";
+import { CheckAuth, isAdmin, isOwner } from "../middlewares/auth.js";
 import {
   validateBodySchema,
   validateParamsSchema,
@@ -48,7 +48,7 @@ productRouter
   )
   .delete(
     CheckAuth,
-    isAdmin,
+    isOwner, 
     validateParamsSchema(idParamsSchema),
     deleteProduct,
   );

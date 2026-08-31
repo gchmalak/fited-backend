@@ -35,6 +35,7 @@ variants:[variantSchema],
 reviews:[reviewSchema],
 averageRating:{type:Number,default:0},
 reviewCount:{type:Number,default:0},
+
 authorId:{type:Schema.Types.ObjectId, ref:"User",required:true},
 isActive:{type:Boolean,default:true},
 

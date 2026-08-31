@@ -34,4 +34,17 @@ export const updateUserRoleSchema = z.object({
 });
 
 // _____________change password____________________________________________
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().regex(passwordRegex, "New password isn't strong enough"),
+});
+
 // ______________modify password___________________________________________
+export const forgotPasswordSchema = z.object({
+  email: z.email("Email must be valid").trim().toLowerCase(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  newPassword: z.string().regex(passwordRegex, "New password isn't strong enough"),
+});
