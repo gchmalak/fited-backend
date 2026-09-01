@@ -32,12 +32,6 @@ const contactMessageSchema = new Schema({
         required: true,
         trim: true,
     },
-    // but new messages will primarily use `messages`.
-    message: {
-        type: String,
-        required: true,
-        trim: true,
-    },
     isRead: {
         type: Boolean,
         default: false,
