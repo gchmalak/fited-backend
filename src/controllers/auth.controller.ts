@@ -308,6 +308,7 @@ export async function forgotPassword(
       "If that email exists, a reset link has been sent.",
     );
   } catch (error) {
+     console.error("FORGOT PASSWORD ERROR:", error);
     next(error);
   }
 }
