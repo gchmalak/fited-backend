@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import * as z from "zod/v4";
+import * as z from "zod";
 
 /**
  * Extended request with parsed query

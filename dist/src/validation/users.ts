@@ -9,18 +9,12 @@ const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
 // 0555-12-34-56
 // +213555123456
 // +213 555 12 34 56
-// 00213555123456
 const algerianPhoneRegex = /^(?:(?:\+213|00213)[5-7]\d{8}|0[5-7]\d{8})$/;
 
 export const loginSchema = z.object({
-  email: z
-    .email("Email must be valid")
-    .trim()
-    .toLowerCase(),
+  email: z.email("Email must be valid").trim().toLowerCase(),
 
-  password: z
-    .string()
-    .regex(passwordRegex, "Password isn't strong enough"),
+  password: z.string().regex(passwordRegex, "Password isn't strong enough"),
 });
 
 export const userSchema = loginSchema.extend({
@@ -37,18 +31,7 @@ export const userSchema = loginSchema.extend({
     .refine(
       (value) => algerianPhoneRegex.test(value),
       "Please enter a valid Algerian phone number",
-    )
-    .transform((value) => {
-      if (value.startsWith("0")) {
-        return `+213${value.slice(1)}`;
-      }
-
-      if (value.startsWith("00213")) {
-        return `+213${value.slice(5)}`;
-      }
-
-      return value;
-    }),
+    ),
 
   avatarUrl: z
     .url("Avatar must be a valid url")
@@ -71,9 +54,7 @@ export const updateUserRoleSchema = z.object({
 // _____________ change password ____________________________________________
 
 export const changePasswordSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(1, "Current password is required"),
+  currentPassword: z.string().min(1, "Current password is required"),
 
   newPassword: z
     .string()
@@ -83,16 +64,11 @@ export const changePasswordSchema = z.object({
 // ______________ modify password ___________________________________________
 
 export const forgotPasswordSchema = z.object({
-  email: z
-    .email("Email must be valid")
-    .trim()
-    .toLowerCase(),
+  email: z.email("Email must be valid").trim().toLowerCase(),
 });
 
 export const resetPasswordSchema = z.object({
-  token: z
-    .string()
-    .min(1, "Token is required"),
+  token: z.string().min(1, "Token is required"),
 
   newPassword: z
     .string()

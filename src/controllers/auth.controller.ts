@@ -47,29 +47,44 @@ export async function register(
   res: Response,
   next: NextFunction,
 ) {
-  const { username, email, password, avatarUrl, bio, role} = req.body;
+  const {
+    username,
+    email,
+    password,
+    phoneNumber,
+    avatarUrl,
+    bio,
+  } = req.body;
 
   try {
-    let finalRole: "admin" | "user" = "user";
-
-  
     const createdUser = new User({
       username,
       email,
       password,
+      phoneNumber,
       avatarUrl,
       bio,
-      role: finalRole,
+      role: "user",
     });
+
     await createdUser.save();
 
-    const userInfo = { id: createdUser._id.toString(), role: createdUser.role };
+    const userInfo = {
+      id: createdUser._id.toString(),
+      role: createdUser.role,
+    };
 
-    const token = jwt.sign(userInfo, process.env.AUTH_SECRET!, {
-      expiresIn: process.env.TOKEN_EXPIRY || "7d",
-    } as jwt.SignOptions);
+    const token = jwt.sign(
+      userInfo,
+      process.env.AUTH_SECRET!,
+      {
+        expiresIn: process.env.TOKEN_EXPIRY || "7d",
+      } as jwt.SignOptions,
+    );
 
-    const userObj = createdUser.toObject() as unknown as Record<string,unknown>;
+    const userObj =
+      createdUser.toObject() as unknown as Record<string, unknown>;
+
     delete userObj.password;
 
     successResponse(
