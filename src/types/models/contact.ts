@@ -1,13 +1,19 @@
 import { Document } from "mongoose";
 
+export type ContactMessageSender = "customer" | "admin";
+
+export interface IContactChatMessage {
+  sender: ContactMessageSender;
+  message: string;
+  createdAt: Date;
+}
+
 export interface IContactMessage {
   name: string;
   email: string;
   subject: string;
-  message: string;
   isRead: boolean;
-  reply?: string;
-  repliedAt?: Date;
+  messages: IContactChatMessage[];
   createdAt: Date;
   updatedAt: Date;
 }
