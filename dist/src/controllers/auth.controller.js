@@ -36,19 +36,22 @@ export async function login(req, res, next) {
 }
 // _______________________REGISTER_________________________________________________________________
 export async function register(req, res, next) {
-    const { username, email, password, avatarUrl, bio, role } = req.body;
+    const { username, email, password, phoneNumber, avatarUrl, bio, } = req.body;
     try {
-        let finalRole = "user";
         const createdUser = new User({
             username,
             email,
             password,
+            phoneNumber,
             avatarUrl,
             bio,
-            role: finalRole,
+            role: "user",
         });
         await createdUser.save();
-        const userInfo = { id: createdUser._id.toString(), role: createdUser.role };
+        const userInfo = {
+            id: createdUser._id.toString(),
+            role: createdUser.role,
+        };
         const token = jwt.sign(userInfo, process.env.AUTH_SECRET, {
             expiresIn: process.env.TOKEN_EXPIRY || "7d",
         });

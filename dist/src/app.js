@@ -22,7 +22,7 @@ const app = express();
 app.set("trust proxy", true);
 app.use(cors({
     credentials: true,
-    origin: new RegExp(process.env.CORS_ORIGIN || "http://localhost:3000"),
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
 }));
 app.use(helmet());
 if (process.env.NODE_ENV === "development")

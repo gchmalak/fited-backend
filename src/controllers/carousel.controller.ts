@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { errorResponse, successResponse } from "../utils/responseFormatter";
-import { CarouselSlide } from "../models/carousel";
+import { errorResponse, successResponse } from "../utils/responseFormatter.js";
+import { CarouselSlide } from "../models/carousel.js";
 import { StatusCodes } from "http-status-codes";
 
 // ____________fetching  active slides sorted by order ___________________________

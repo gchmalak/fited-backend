@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { ICarouselSlide } from "../types/models/carousel";
+import { ICarouselSlide } from "../types/models/carousel.js";
 
 const carouselSlideSchema=new Schema<ICarouselSlide>(
    { imageUrl:{type:String, required:true},

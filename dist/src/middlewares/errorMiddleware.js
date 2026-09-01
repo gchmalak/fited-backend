@@ -1,4 +1,4 @@
-import { errorResponse } from "../utils/responseFormatter";
+import { errorResponse } from "../utils/responseFormatter.js";
 import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 export function errorMiddleware(err, req, res, next) {

@@ -14,16 +14,37 @@ const userSchema = new Schema({
         unique: true,
         trim: true,
     },
+    phoneNumber: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+    },
     password: {
         type: String,
         required: true,
     },
-    resetPasswordTokenHash: { type: String },
-    resetPasswordExpires: { type: Date },
-    role: { type: String, enum: ["owner", "admin", "user"], default: "user" },
-    avatarUrl: { type: String, },
-    bio: { type: String },
-    isActive: { type: Boolean, default: true },
+    resetPasswordTokenHash: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
+    },
+    role: {
+        type: String,
+        enum: ["owner", "admin", "user"],
+        default: "user",
+    },
+    avatarUrl: {
+        type: String,
+    },
+    bio: {
+        type: String,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
     wishlist: [
         {
             type: Schema.Types.ObjectId,
