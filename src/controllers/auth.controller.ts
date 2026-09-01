@@ -8,6 +8,7 @@ import {
 } from "../utils/responseFormatter.js";
 import { StatusCodes } from "http-status-codes";
 import { sendEmail } from "../utils/email.js";
+import bcrypt from "bcryptjs";
 
 // _______________________LOGIN_________________________________________________________________
 
@@ -340,12 +341,19 @@ export async function resetPassword(
       return;
     }
 
-   await User.findByIdAndUpdate(user._id, {
-  resetPasswordTokenHash: tokenHash,
-  resetPasswordExpires: new Date(
-    Date.now() + 60 * 60 * 1000,
-  ),
-});
+    // Hash the new password manually because we are using
+    // findByIdAndUpdate instead of user.save().
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.findByIdAndUpdate(user._id, {
+      password: hashedPassword,
+
+      // Invalidate the reset token after successful reset
+      $unset: {
+        resetPasswordTokenHash: 1,
+        resetPasswordExpires: 1,
+      },
+    });
 
     successResponse(
       res,
