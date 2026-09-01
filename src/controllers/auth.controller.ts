@@ -238,8 +238,7 @@ export async function forgotPassword(
 
     const user = await User.findOne({ email });
 
-    // Always respond the same way whether or not
-    // the email exists to prevent account enumeration.
+    // Don't reveal whether an account exists
     if (!user) {
       successResponse(
         res,
@@ -256,13 +255,14 @@ export async function forgotPassword(
       .update(rawToken)
       .digest("hex");
 
-    user.resetPasswordTokenHash = tokenHash;
-
-    user.resetPasswordExpires = new Date(
-      Date.now() + 60 * 60 * 1000,
-    );
-
-    await user.save();
+    // Use update instead of save so unrelated required
+    // fields such as phoneNumber are not revalidated.
+    await User.findByIdAndUpdate(user._id, {
+      resetPasswordTokenHash: tokenHash,
+      resetPasswordExpires: new Date(
+        Date.now() + 60 * 60 * 1000,
+      ),
+    });
 
     const resetLink =
       `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
@@ -308,11 +308,9 @@ export async function forgotPassword(
       "If that email exists, a reset link has been sent.",
     );
   } catch (error) {
-     console.error("FORGOT PASSWORD ERROR:", error);
     next(error);
   }
 }
-
 // _______________________RESET PASSWORD (using emailed token)_________________________________
 
 export async function resetPassword(
@@ -342,11 +340,12 @@ export async function resetPassword(
       return;
     }
 
-    user.password = newPassword;
-    user.resetPasswordTokenHash = undefined;
-    user.resetPasswordExpires = undefined;
-
-    await user.save();
+   await User.findByIdAndUpdate(user._id, {
+  resetPasswordTokenHash: tokenHash,
+  resetPasswordExpires: new Date(
+    Date.now() + 60 * 60 * 1000,
+  ),
+});
 
     successResponse(
       res,
