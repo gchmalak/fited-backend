@@ -1,6 +1,28 @@
 import { model, Schema } from "mongoose";
 import { IContactMessage } from "../types/models/contact.js";
 
+const contactChatMessageSchema = new Schema(
+  {
+    sender: {
+      type: String,
+      enum: ["customer", "admin"],
+      required: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: true },
+);
+
 const contactMessageSchema = new Schema<IContactMessage>(
   {
     name: {
@@ -27,26 +49,10 @@ const contactMessageSchema = new Schema<IContactMessage>(
       default: false,
     },
 
-    messages: [
-      {
-        sender: {
-          type: String,
-          enum: ["customer", "admin"],
-          required: true,
-        },
-
-        message: {
-          type: String,
-          required: true,
-          trim: true,
-        },
-
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    messages: {
+      type: [contactChatMessageSchema],
+      default: [],
+    },
   },
   {
     timestamps: true,
